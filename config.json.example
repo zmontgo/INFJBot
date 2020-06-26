@@ -1,0 +1,10 @@
+{
+  "prefix": ".",
+  "botToken": "000",
+  "version": "0.0.0 Beta",
+  "versioninfo": "Cloned bot from Finriq.",
+  "playing": "being developed.",
+  "channels": {
+    "pinchannel": "000"
+  }
+}
