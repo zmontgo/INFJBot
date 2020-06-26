@@ -2,7 +2,7 @@ const pinActions = require('../eventActions/pinActions');
 const config = require('../config.json');
 
 module.exports.execute = async (client, message) => {
-	if(message.channel.id === config.channels.accountability) {
+	if(message.channel.id === config.channels.pinchannel) {
 		// Call to method elsewhere
 		pinActions.userUnpinsMessage(message, message.author);
 	}
