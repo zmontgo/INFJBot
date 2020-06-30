@@ -11,7 +11,7 @@ function timedifference(timestamp1, timestamp2) {
 
   var difference = timestamp2.getTime() - timestamp1.getTime();
 
-  difference = Math.floor(difference ); // Find difference in hours (time / milliseconds / minutes / hours) 1000 / 60 / 60
+  difference = Math.floor(difference / 1000 / 60 / 60); // Find difference in hours (time / milliseconds / minutes / hours)
 
   return difference;
 }
@@ -33,10 +33,10 @@ class pinActions {
 			const sentMessage = reaction.message;
 			const currentChannel = sentMessage.channel;
 
-			let fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The entire user info from the message's ID
+			const fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The guild member info from the message's ID
 
 			// Make sure a user is pinning their own message
-			if(user.id !== sentMessage.author.id && fullUser.hasPermission('MANAGE_MESSAGES') == false) return currentChannel.send("You can only pin your own messages!");
+			if(user.id !== sentMessage.author.id) return currentChannel.send("You can only pin your own messages!");
 
 			var pinchannel = client.channels.get(config.channels.pinchannel); // This is the channel that the messages are sent to
 
