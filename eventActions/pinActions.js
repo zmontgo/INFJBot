@@ -34,7 +34,7 @@ class pinActions {
 			const currentChannel = sentMessage.channel;
 
 			// Make sure a user is pinning their own message
-			if(user.id != sentMessage.author.id) return currentChannel.send("You can only pin your own messages!");
+			if(user.id != sentMessage.author.id && !fullUser.hasPermission('MANAGE_MESSAGES')) return currentChannel.send("You can only pin your own messages!");
 
 			let fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The entire user info from the message's ID
 
