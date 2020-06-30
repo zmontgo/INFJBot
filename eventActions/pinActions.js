@@ -33,10 +33,10 @@ class pinActions {
 			const sentMessage = reaction.message;
 			const currentChannel = sentMessage.channel;
 
-			// Make sure a user is pinning their own message
-			if(user.id != sentMessage.author.id && !user.hasPermission('MANAGE_MESSAGES')) return currentChannel.send("You can only pin your own messages!");
-
 			let fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The entire user info from the message's ID
+
+			// Make sure a user is pinning their own message
+			if(user.id != sentMessage.author.id && !fullUser.hasPermission('MANAGE_MESSAGES')) return currentChannel.send("You can only pin your own messages!");
 
 			try {
 				var pinchannel = client.channels.get(config.channels.pinchannel); // This is the channel that the messages are sent to
