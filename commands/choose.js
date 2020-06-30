@@ -13,7 +13,7 @@ module.exports.execute = async (client, message, args) => {
   }
 
   return await message.channel.send(
-    'Please specify the options I should choose from!\nHint: `.choose option1, option2, ..., optionX`'
+    'Please specify the options I should choose from!\nHint: `+choose option1, option2, ..., optionX`'
   );
 };
 

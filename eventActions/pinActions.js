@@ -1,4 +1,5 @@
 const config = require('../config.json');
+const Discord = require('discord.js');
 
 function checkRole(role) {
 	return role === config.roles.pinRole;
@@ -10,121 +11,96 @@ function timedifference(timestamp1, timestamp2) {
 
   var difference = timestamp2.getTime() - timestamp1.getTime();
 
-  difference = Math.floor(difference / 1000 / 60 / 60); // Find difference in hours (time / milliseconds / minutes / hours)
+  difference = Math.floor(difference ); // Find difference in hours (time / milliseconds / minutes / hours) 1000 / 60 / 60
 
   return difference;
 }
 
-// Helper method to loop through pins. I was getting mad when I named it...
-function isMessagePinnedAtAll(messageToCheck, setOfPinnedMessages){
-	const fetchedMessagesIterator = setOfPinnedMessages.values();
-	let msgVal = fetchedMessagesIterator.next().value;
-	while(msgVal != null){
-		if(msgVal.id === messageToCheck.id){
-			return true;
-		}
-		msgVal = fetchedMessagesIterator.next().value;
-	}
+function attachIsImage(msgAttach) {
+	var url = msgAttach.url;
+	//True if this url is a png image.
+	return url.indexOf("png", url.length - "png".length /*or 3*/) !== -1;
 }
 
 class pinActions {
-	static async userPinsMessage(reaction, user) {
-
-		/* Structure taken from tosActions.js for sake of consistency */
-
+	static async userPinsMessage(client, reaction, user) {
 		// Check if we are in the pin channel and the reaction emote is the proper emote
-		if(reaction.message.channel.id == config.channels.pinchannel
-						&& reaction._emoji.name == config.emotes.pinMessage) {
+		if(reaction.message.channel.id == config.channels.availablechannel && reaction._emoji.name == config.emotes.pinMessage) {
 
 			const sentMessage = reaction.message;
 			const currentChannel = sentMessage.channel;
 
-			let fullUser; // This will house all user info about the person who reacted
+			// Make sure a user is pinning their own message
+			if(user.id != sentMessage.author.id) return currentChannel.send("You can only pin your own messages!");
 
-			fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id);
+			let fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The entire user info from the message's ID
 
-			if (fullUser._roles.find(checkRole)) {
-				let lastWasTwentyFourHours = false; // Aptly named variable.
-				// Get the pinned messages within a channel
-				await currentChannel.fetchPinnedMessages().then(fetchedPins => {
+			try {
+				var pinchannel = client.channels.get(config.channels.pinchannel); // This is the channel that the messages are sent to
 
-					// Check to see if they already have pinned messages
-					const pinMsgIterator = fetchedPins.values();
+				if (fullUser._roles.find(checkRole)) {
+					pinchannel.fetchMessages().then(messages => {
+						const botmessages = messages.filter(msg => msg.author.id === client.user.id && timedifference(msg.createdTimestamp, Date.now()) <= 24);
 
-					for (let i = 0; i < fetchedPins.size; i++){
-						const msgVal = pinMsgIterator.next();
-						if(msgVal.value.author.id == user.id) {
-							if (timedifference(msgVal.value.createdTimestamp, Date.now()) >= 24) {
-								lastWasTwentyFourHours = true;
+						var bool = false;
+
+						botmessages.forEach(message => {
+							try {
+								message.embeds.forEach((embed) => {
+									if (embed.footer.text === sentMessage.author.id) {
+										bool = true;
+										return;
+									}
+								});
+							} catch (err) {
+								// Pass
 							}
-						} else {
-							lastWasTwentyFourHours = true; // Couldn't find any messages pinned
-						}
+						});
 
-						break;
-					}
-				});
+						if (bool == false) {
+							let customEmbed = new Discord.RichEmbed()
+							.setColor('#750384')
+							.setTitle(sentMessage.author.tag)
+							.setThumbnail(sentMessage.author.avatarURL)
+							.setDescription(
+								sentMessage.content
+							)
+							.setFooter(sentMessage.author.id);
 
-				if (lastWasTwentyFourHours == true) {
-					// Check if there are too many existing pins
-					currentChannel.fetchPinnedMessages().then(messages => {
-						const numOfPins = messages.size;
-						if(numOfPins === 50){
-							currentChannel.send('**Uh oh!** This channel has reached its pin limit. Contact a Helper to purge the list.');
-							return;
-						}
-					});
-
-					// Make sure a user is pinning their own message
-					if(user.id != sentMessage.author.id) return;
-
-					currentChannel.startTyping();
-
-					await currentChannel.fetchPinnedMessages().then(fetchedPins =>{
-
-						// If the pushpin reaction from the bot does not exist, pin the message
-						if(!isMessagePinnedAtAll(sentMessage, fetchedPins)){
-							// Pin the message
-							let existingMessageCount = 0;
-
-
-							// Get the pinned messages within a channel
-							if(isMessagePinnedAtAll(sentMessage, fetchedPins) == true) return;
-							// Check to see if they already have pinned messages
-							const pinMsgIterator = fetchedPins.values();
-
-							for (let i = 0; i < fetchedPins.size; i++){
-								const msgVal = pinMsgIterator.next().value;
-								if(msgVal.author.id === user.id){
-									existingMessageCount++;
-								}
+							if (sentMessage.attachments.size > 0) {
+								sentMessage.attachments.forEach(attachment => {
+									if (sentMessage.attachments.every(attachIsImage)) {
+										customEmbed.setImage(attachment.url);
+									} else {
+										customEmbed.addField("Attachement URL", attachment.url);
+									}
+								});
 							}
 
-							// Pin the message and stop typing
-							currentChannel.stopTyping();
+							// Send the message and stop typing
 							sentMessage.clearReactions()
-								.then(sentMessage.pin())
-								.catch(() => console.error('Error with pinning message.'));
-
-							// If they have other pinned messages, give them a good 'ol reminder.
-							if (existingMessageCount > 1){
-								currentChannel.send('Hey, ' + user.username + ', I just wanted to remind you that you have ' + existingMessageCount + ' other pinned messages 😄');
-							}
+								.then(pinchannel.send(customEmbed))
+								.then(currentChannel.send("Your message has been sent in " + pinchannel + "!"))
+								.catch(() => console.error('Error with sending message.'));
+						} else {
+							return currentChannel.send("Looks like your last message was sent less than 24 hours ago! Try again later!").then((msg) => msg.delete(5000).catch());
 						}
-
-					});
+					})
+					.catch(console.error);
 				} else {
-					return currentChannel.send("Looks like your last message was sent less than 24 hours ago! Try again later!").then((msg) => msg.delete(5000).catch());
+					return currentChannel.send("Looks like you don't have the privileges to pin that message!").then((msg) => msg.delete(5000).catch());
 				}
-			} else {
-				return currentChannel.send("Looks like you don't have the privileges to pin that message!").then((msg) => msg.delete(5000).catch());
+			} catch (err) {
+				console.error("Error! " + err);
 			}
+		} else {
+			console.log("Someone tried pinning message outside channel " + availablechannel);
 		}
 	}
 
 	// Unpin message via command
 	static async userUnpinsMessage(message, user){
-		if(message.channel.id === config.channels.pinchannel) {
+		if(message.channel.id === config.channels.availablechannel) {
 
 			const currentChannel = message.channel;
 
