@@ -16,10 +16,10 @@ function timedifference(timestamp1, timestamp2) {
   return difference;
 }
 
-function attachIsImage(msgAttach) {
-	var url = msgAttach.url;
-	//True if this url is a png image.
-	return url.indexOf("png", url.length - "png".length /*or 3*/) !== -1;
+function attachIsImage(file) {
+	const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+
+	return file && acceptedImageTypes.includes(file['type'])
 }
 
 class pinActions {
