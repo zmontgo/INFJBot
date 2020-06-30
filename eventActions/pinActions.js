@@ -18,11 +18,10 @@ function timedifference(timestamp1, timestamp2) {
 
 function attachIsImage(msgAttach) {
 	var url = msgAttach.url;
-	//True if this url is a png image.
+	//True if this url is a png or jpg image. Gifs don't work.
 	if (url.indexOf("png", url.length - "png".length /*or 3*/) !== -1) return true;
 	else if (url.indexOf("jpg", url.length - "jpg".length /*or 3*/) !== -1) return true;
 	else if (url.indexOf("jpeg", url.length - "jpeg".length /*or 4*/) !== -1) return true;
-	else if (url.indexOf("gif", url.length - "gif".length /*or 3*/) !== -1) return true;
 	else return false;
 }
 
