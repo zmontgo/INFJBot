@@ -28,7 +28,7 @@ function attachIsImage(msgAttach) {
 class pinActions {
 	static async userPinsMessage(client, reaction, user) {
 		// Check if we are in the pin channel and the reaction emote is the proper emote
-		if(reaction.message.channel.id == config.channels.availablechannel && reaction._emoji.name == config.emotes.pinMessage) {
+		if(config.channels.availablechannel.includes(reaction.message.channel.id) && reaction._emoji.name == config.emotes.pinMessage) {
 
 			const sentMessage = reaction.message;
 			const currentChannel = sentMessage.channel;
