@@ -36,65 +36,61 @@ class pinActions {
 			let fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The entire user info from the message's ID
 
 			// Make sure a user is pinning their own message
-			if(user.id != sentMessage.author.id && !fullUser.hasPermission('MANAGE_MESSAGES')) return currentChannel.send("You can only pin your own messages!");
+			if(user.id !== sentMessage.author.id && fullUser.hasPermission('MANAGE_MESSAGES') == false) return currentChannel.send("You can only pin your own messages!");
 
-			try {
-				var pinchannel = client.channels.get(config.channels.pinchannel); // This is the channel that the messages are sent to
+			var pinchannel = client.channels.get(config.channels.pinchannel); // This is the channel that the messages are sent to
 
-				if (fullUser._roles.find(checkRole)) {
-					pinchannel.fetchMessages().then(messages => {
-						const botmessages = messages.filter(msg => msg.author.id === client.user.id && timedifference(msg.createdTimestamp, Date.now()) <= 24);
+			if (fullUser._roles.find(checkRole)) {
+				pinchannel.fetchMessages().then(messages => {
+					const botmessages = messages.filter(msg => msg.author.id === client.user.id && timedifference(msg.createdTimestamp, Date.now()) <= 24);
 
-						var bool = false;
+					var bool = false;
 
-						botmessages.forEach(message => {
-							try {
-								message.embeds.forEach((embed) => {
-									if (embed.footer.text === sentMessage.author.id) {
-										bool = true;
-										return;
-									}
-								});
-							} catch (err) {
-								// Pass
-							}
-						});
-
-						if (bool == false) {
-							let customEmbed = new Discord.RichEmbed()
-							.setColor('#750384')
-							.setTitle(sentMessage.author.tag)
-							.setThumbnail(sentMessage.author.avatarURL)
-							.setDescription(
-								sentMessage.content
-							)
-							.setFooter(sentMessage.author.id);
-
-							if (sentMessage.attachments.size > 0) {
-								sentMessage.attachments.forEach(attachment => {
-									if (sentMessage.attachments.every(attachIsImage)) {
-										customEmbed.setImage(attachment.url);
-									} else {
-										customEmbed.addField("Attachement URL", attachment.url);
-									}
-								});
-							}
-
-							// Send the message and stop typing
-							sentMessage.clearReactions()
-								.then(pinchannel.send(customEmbed))
-								.then(currentChannel.send("Your message has been sent in " + pinchannel + "!"))
-								.catch(() => console.error('Error with sending message.'));
-						} else {
-							return currentChannel.send("Looks like your last message was sent less than 24 hours ago! Try again later!").then((msg) => msg.delete(5000).catch());
+					botmessages.forEach(message => {
+						try {
+							message.embeds.forEach((embed) => {
+								if (embed.footer.text === sentMessage.author.id) {
+									bool = true;
+									return;
+								}
+							});
+						} catch (err) {
+							// Pass
 						}
-					})
-					.catch(console.error);
-				} else {
-					return currentChannel.send("Looks like you don't have the privileges to pin that message!").then((msg) => msg.delete(5000).catch());
-				}
-			} catch (err) {
-				console.error("Error! " + err);
+					});
+
+					if (bool == false) {
+						let customEmbed = new Discord.RichEmbed()
+						.setColor('#750384')
+						.setTitle(sentMessage.author.tag)
+						.setThumbnail(sentMessage.author.avatarURL)
+						.setDescription(
+							sentMessage.content
+						)
+						.setFooter(sentMessage.author.id);
+
+						if (sentMessage.attachments.size > 0) {
+							sentMessage.attachments.forEach(attachment => {
+								if (sentMessage.attachments.every(attachIsImage)) {
+									customEmbed.setImage(attachment.url);
+								} else {
+									customEmbed.addField("Attachement URL", attachment.url);
+								}
+							});
+						}
+
+						// Send the message and stop typing
+						sentMessage.clearReactions()
+							.then(pinchannel.send(customEmbed))
+							.then(currentChannel.send("Your message has been sent in " + pinchannel + "!"))
+							.catch(() => console.error('Error with sending message.'));
+					} else {
+						return currentChannel.send("Looks like your last message was sent less than 24 hours ago! Try again later!").then((msg) => msg.delete(5000).catch());
+					}
+				})
+				.catch(console.error);
+			} else {
+				return currentChannel.send("Looks like you don't have the privileges to pin that message!").then((msg) => msg.delete(5000).catch());
 			}
 		} else {
 			console.log("Someone tried pinning message outside channel " + availablechannel);
