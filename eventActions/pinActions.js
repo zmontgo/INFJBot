@@ -45,12 +45,13 @@ class pinActions {
 					const botmessages = messages.filter(msg => msg.author.id === client.user.id && timedifference(msg.createdTimestamp, Date.now()) <= 24);
 
 					var bool = false;
+					var timeleft;
 
 					botmessages.forEach(message => {
 						try {
 							message.embeds.forEach((embed) => {
 								if (embed.footer.text === sentMessage.author.id) {
-									const timeleft = timedifference(message.createdTimestamp, Date.now());
+									timeleft = timedifference(message.createdTimestamp, Date.now());
 									bool = true;
 									return;
 								}
