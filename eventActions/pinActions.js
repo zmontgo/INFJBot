@@ -2,7 +2,7 @@ const config = require('../config.json');
 const Discord = require('discord.js');
 
 function checkRole(role) {
-	return role === config.roles.pinRole;
+	return config.roles.pinRoles.includes(role);
 }
 
 function timedifference(timestamp1, timestamp2) {
