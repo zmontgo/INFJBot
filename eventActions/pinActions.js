@@ -92,40 +92,6 @@ class pinActions {
 			} else {
 				return currentChannel.send("Looks like you don't have the privileges to pin that message!").then((msg) => msg.delete(5000).catch());
 			}
-		} else {
-			console.log("Someone tried pinning message outside channel " + availablechannel);
-		}
-	}
-
-	// Unpin message via command
-	static async userUnpinsMessage(message, user){
-		if(message.channel.id === config.channels.availablechannel) {
-
-			const currentChannel = message.channel;
-
-			let hasPinnedMessage = false;
-
-			// Get the pinned messages within a channel
-			await currentChannel.fetchPinnedMessages().then(fetchedPins => {
-
-				// Check to see if they already have pinned messages
-				const pinMsgIterator = fetchedPins.values();
-
-				for (let i = 0; i < fetchedPins.size; i++){
-					const msgVal = pinMsgIterator.next();
-					if(msgVal.value.author.id == user.id){
-						hasPinnedMessage = true;
-						msgVal.value.unpin();
-						break;
-					}
-				}
-
-				if(hasPinnedMessage){
-					currentChannel.send('Hey, ' + user.username + ', I\'ve unpinned your most recent message as requested!');
-				} else {
-					currentChannel.send('Sorry, ' + user.username + '! I couldn\'t seem to find any pinned messages from you.');
-				}
-			});
 		}
 	}
 }
