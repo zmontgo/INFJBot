@@ -42,7 +42,8 @@ class pinActions {
 
 			if (fullUser._roles.find(checkRole)) {
 				pinchannel.fetchMessages().then(messages => {
-					const botmessages = messages.filter(msg => msg.author.id === client.user.id && timedifference(msg.createdTimestamp, Date.now()) <= 24);
+					const timeleft = timedifference(msg.createdTimestamp, Date.now());
+					const botmessages = messages.filter(msg => msg.author.id === client.user.id && timeleft <= 24);
 
 					var bool = false;
 
@@ -85,7 +86,7 @@ class pinActions {
 							.then(currentChannel.send("Your message has been sent in " + pinchannel + "!"))
 							.catch(() => console.error('Error with sending message.'));
 					} else {
-						return currentChannel.send("Looks like your last message was sent less than 24 hours ago! Try again later!").then((msg) => msg.delete(5000).catch());
+						return currentChannel.send("Looks like your last message was sent less than " + config.cooldowntime + " hours ago! Try again in " + timeleft + "!").then((msg) => msg.delete(5000).catch());
 					}
 				})
 				.catch(console.error);
