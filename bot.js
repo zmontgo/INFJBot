@@ -2,7 +2,6 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 const config = require('./config.json');
-const connect = require('./databaseFiles/connect.js');
 
 const client = new Discord.Client();
 
@@ -38,8 +37,5 @@ fs.readdir('./commands/', (err, files) => {
     });
   });
 });
-
-// Connect to given database
-connect.instantiateConnection();
 
 client.login(config.botToken);
