@@ -36,7 +36,7 @@ class pinActions {
 			const fullUser = await sentMessage.guild.fetchMember(sentMessage.member.id); // The guild member info from the message's ID
 
 			// Make sure a user is pinning their own message
-			//if(user.id !== sentMessage.author.id) return currentChannel.send("You can only pin your own messages!");
+			if(user.id !== sentMessage.author.id) return currentChannel.send("You can only pin your own messages!");
 
 			var pinchannel = client.channels.get(config.channels.pinchannel); // This is the channel that the messages are sent to
 
