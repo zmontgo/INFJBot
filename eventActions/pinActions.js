@@ -42,8 +42,7 @@ class pinActions {
 
 			if (fullUser._roles.find(checkRole)) {
 				pinchannel.fetchMessages().then(messages => {
-					const timeleft = timedifference(msg.createdTimestamp, Date.now());
-					const botmessages = messages.filter(msg => msg.author.id === client.user.id && timeleft <= 24);
+					const botmessages = messages.filter(msg => msg.author.id === client.user.id && timedifference(msg.createdTimestamp, Date.now()) <= 24);
 
 					var bool = false;
 
@@ -51,6 +50,7 @@ class pinActions {
 						try {
 							message.embeds.forEach((embed) => {
 								if (embed.footer.text === sentMessage.author.id) {
+									const timeleft = timedifference(message.createdTimestamp, Date.now());
 									bool = true;
 									return;
 								}
