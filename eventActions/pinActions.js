@@ -2,7 +2,13 @@ const config = require('../config.json');
 const Discord = require('discord.js');
 
 function checkRole(role) {
-	return role === config.roles.pinRole;
+	config.roles.forEach(pinrole => {
+		if (pinrole === role) {
+			return true;
+		}
+	});
+	
+	return false;
 }
 
 function timedifference(timestamp1, timestamp2) {
