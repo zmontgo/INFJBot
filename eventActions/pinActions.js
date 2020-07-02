@@ -87,7 +87,7 @@ class pinActions {
 							.then(currentChannel.send("Your message has been sent in " + pinchannel + "!"))
 							.catch(() => console.error('Error with sending message.'));
 					} else {
-						return currentChannel.send("Looks like your last message was sent less than " + config.cooldowntime + " hours ago! Try again in " + (timeleft - config.cooldowntime) + " hours!").then((msg) => msg.delete(5000).catch());
+						return currentChannel.send("Looks like your last message was sent less than " + config.cooldowntime + " hours ago! Try again in " + (config.cooldowntime - timeleft) + " hours!").then((msg) => msg.delete(5000).catch());
 					}
 				})
 				.catch(console.error);
